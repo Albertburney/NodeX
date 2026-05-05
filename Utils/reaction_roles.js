@@ -1,13 +1,4 @@
-const fs = require('fs');
-
-function loadSettings() {
-  if (!fs.existsSync('./settings.json')) return {};
-  return JSON.parse(fs.readFileSync('./settings.json', 'utf8'));
-}
-
-function saveSettings(settings) {
-  fs.writeFileSync('./settings.json', JSON.stringify(settings, null, 2));
-}
+const { getServerSettings, updateServerSettings } = require('./settings');
 
 // when user adds a reaction
 async function handleReactionAdd(reaction, user) {
@@ -19,8 +10,7 @@ async function handleReactionAdd(reaction, user) {
     catch { return; }
   }
 
-  const settings = loadSettings();
-  const serverSettings = settings[reaction.message.guild.id];
+  const serverSettings = getServerSettings(reaction.message.guild.id);
   if (!serverSettings?.reactionRoles) return;
 
   // find a matching reaction role for this message + emoji
@@ -47,8 +37,7 @@ async function handleReactionRemove(reaction, user) {
     catch { return; }
   }
 
-  const settings = loadSettings();
-  const serverSettings = settings[reaction.message.guild.id];
+  const serverSettings = getServerSettings(reaction.message.guild.id);
   if (!serverSettings?.reactionRoles) return;
 
   const match = serverSettings.reactionRoles.find(

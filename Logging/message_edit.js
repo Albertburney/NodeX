@@ -1,18 +1,12 @@
-const {EmbedBuilder} = require('discord.js'); 
-const fs = require('fs');// This is main module.
-
-function loadSettings() {
-  if (!fs.existsSync('./settings.json')) return {};
-  return JSON.parse(fs.readFileSync('./settings.json', 'utf8'));
-}
+const {EmbedBuilder} = require('discord.js');
+const { getServerSettings } = require('../Utils/settings');
 
 async function handleMessageEdit(oldMessage, newMessage) {
    if (!newMessage.content) return;
    if (newMessage.author.bot) return;
    if (oldMessage.content === newMessage.content) return; // ignore embed-only updates
  
-   const settings = loadSettings();                          // 👈 call it
-  const serverSettings = settings[newMessage.guild.id];    // 👈 define it
+   const serverSettings = getServerSettings(newMessage.guild.id);
   if (!serverSettings?.logChannel) return;          
 
    const logChannel = newMessage.client.channels.cache.get(serverSettings.logChannel);

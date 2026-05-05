@@ -1,0 +1,54 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/dashboard">
+            <i class="fas fa-robot me-2"></i>
+            Relay Dashboard
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <% if (user) { %>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="fas fa-home me-1"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                <% } %>
+            </ul>
+
+            <ul class="navbar-nav">
+                <% if (user) { %>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <% if (user.avatar) { %>
+                                <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=32"
+                                     class="rounded-circle me-2" style="width: 32px; height: 32px;">
+                            <% } else { %>
+                                <i class="fas fa-user-circle me-2"></i>
+                            <% } %>
+                            <%= user.username %>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/logout">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                <% } else { %>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-discord btn-sm ms-2" href="/login">
+                            <i class="fab fa-discord me-1"></i>
+                            Login with Discord
+                        </a>
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+</nav>

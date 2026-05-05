@@ -1,14 +1,8 @@
 const { EmbedBuilder } = require('discord.js');
-const fs = require('fs');
-
-function loadSettings() {
-  if (!fs.existsSync('./settings.json')) return {};
-  return JSON.parse(fs.readFileSync('./settings.json', 'utf8'));
-}
+const { getServerSettings } = require('../Utils/settings');
 
 async function handleMemberJoin(member) {
-  const settings = loadSettings();
-  const serverSettings = settings[member.guild.id];
+  const serverSettings = getServerSettings(member.guild.id);
   if (!serverSettings?.logChannel) return;
 
   const logChannel = member.client.channels.cache.get(serverSettings.logChannel);

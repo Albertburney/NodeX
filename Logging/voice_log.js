@@ -1,16 +1,10 @@
 const { EmbedBuilder } = require('discord.js');
-const fs = require('fs');
+const { getServerSettings } = require('../Utils/settings');
 
 const voiceJoinTimes = new Map(); // track when someone joined voice
 
-function loadSettings() {
-  if (!fs.existsSync('./settings.json')) return {};
-  return JSON.parse(fs.readFileSync('./settings.json', 'utf8'));
-}
-
 async function handleVoiceLog(oldState, newState) {
-  const settings = loadSettings();
-  const serverSettings = settings[newState.guild.id];
+  const serverSettings = getServerSettings(newState.guild.id);
   if (!serverSettings?.logChannel) return;
 
   const logChannel = newState.client.channels.cache.get(serverSettings.logChannel);

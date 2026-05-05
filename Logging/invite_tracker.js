@@ -1,12 +1,7 @@
 const { EmbedBuilder } = require('discord.js');
-const fs = require('fs');
+const { getServerSettings } = require('../Utils/settings');
 
 const inviteCache = new Map(); // store invite uses per guild
-
-function loadSettings() {
-  if (!fs.existsSync('./settings.json')) return {};
-  return JSON.parse(fs.readFileSync('./settings.json', 'utf8'));
-}
 
 // call this when bot starts and when someone joins
 async function cacheInvites(guild) {
@@ -15,8 +10,7 @@ async function cacheInvites(guild) {
 }
 
 async function handleInviteJoin(member) {
-  const settings = loadSettings();
-  const serverSettings = settings[member.guild.id];
+  const serverSettings = getServerSettings(member.guild.id);
   if (!serverSettings?.logChannel) return;
 
   const logChannel = member.client.channels.cache.get(serverSettings.logChannel);

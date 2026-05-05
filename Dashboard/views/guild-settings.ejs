@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link:hover {
+            color: white;
+            background: rgba(255,255,255,0.1);
+        }
+        .main-content {
+            background: #f8f9fa;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .setting-toggle {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .setting-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #5865F2;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="fas fa-robot me-2"></i>
+                Relay Dashboard
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <% if (user) { %>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard">
+                                <i class="fas fa-home me-1"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                    <% } %>
+                </ul>
+
+                <ul class="navbar-nav">
+                    <% if (user) { %>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <% if (user.avatar) { %>
+                                    <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=32"
+                                         class="rounded-circle me-2" style="width: 32px; height: 32px;">
+                                <% } else { %>
+                                    <i class="fas fa-user-circle me-2"></i>
+                                <% } %>
+                                <%= user.username %>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/logout">
+                                    <i class="fas fa-sign-out-alt me-2"></i>
+                                    Logout
+                                </a></li>
+                            </ul>
+                        </li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar">
+                    <div class="p-3">
+                        <h5 class="mb-4">
+                            <i class="fas fa-robot me-2"></i>
+                            Relay Bot
+                        </h5>
+                        <nav class="nav flex-column">
+                            <a class="nav-link" href="/dashboard">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                            <a class="nav-link active" href="/dashboard">
+                                <i class="fas fa-cog me-2"></i>
+                                Settings
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content p-4">
+                <div class="container">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+                    <li class="breadcrumb-item active"><%= guild.name %></li>
+                </ol>
+            </nav>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <% if (guild.icon) { %>
+                        <img src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png?size=64"
+                             class="rounded-circle me-3" style="width: 64px; height: 64px;">
+                    <% } else { %>
+                        <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center me-3"
+                             style="width: 64px; height: 64px;">
+                            <i class="fas fa-users fa-2x text-white"></i>
+                        </div>
+                    <% } %>
+                    <h2 class="d-inline"><%= guild.name %></h2>
+                    <span class="badge bg-primary ms-2"><%= guild.member_count || 'Unknown' %> members</span>
+                </div>
+                <div>
+                    <button class="btn btn-success" onclick="saveAllSettings()">
+                        <i class="fas fa-save me-2"></i>
+                        Save All Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Tabs -->
+    <div class="row">
+        <div class="col-12">
+            <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general"
+                            type="button" role="tab">General</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="automod-tab" data-bs-toggle="tab" data-bs-target="#automod"
+                            type="button" role="tab">AutoMod</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="messages-tab" data-bs-toggle="tab" data-bs-target="#messages"
+                            type="button" role="tab">Messages</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs"
+                            type="button" role="tab">Logs</button>
+                </li>
+            </ul>
+
+            <div class="tab-content mt-4" id="settingsTabsContent">
+                <!-- General Settings -->
+                <div class="tab-pane fade show active" id="general" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-cog me-2"></i>General Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Log Channel</label>
+                                        <select class="form-select" id="logChannel">
+                                            <option value="">Select a channel...</option>
+                                            <!-- Channels will be populated via JavaScript -->
+                                        </select>
+                                        <small class="form-text text-muted">Where moderation actions are logged</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Welcome Channel</label>
+                                        <select class="form-select" id="welcomeChannel">
+                                            <option value="">Select a channel...</option>
+                                            <!-- Channels will be populated via JavaScript -->
+                                        </select>
+                                        <small class="form-text text-muted">Where welcome messages are sent</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AutoMod Settings -->
+                <div class="tab-pane fade" id="automod" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-shield-alt me-2"></i>Auto Moderation</h5>
+                            <label class="form-check-label">
+                                <input type="checkbox" class="form-check-input me-2" id="automodEnabled"
+                                       <%= settings.automod?.enabled ? 'checked' : '' %>>
+                                Enable AutoMod
+                            </label>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Bad Words (comma-separated)</label>
+                                        <textarea class="form-control" id="badWords" rows="3"
+                                                  placeholder="Enter bad words separated by commas"><%= (settings.automod?.badWords || []).join(', ') %></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Spam Detection</label>
+                                        <select class="form-select" id="spamLimit">
+                                            <option value="3" <%= (settings.automod?.spamLimit || 5) == 3 ? 'selected' : '' %>>Strict (3 messages)</option>
+                                            <option value="5" <%= (settings.automod?.spamLimit || 5) == 5 ? 'selected' : '' %>>Normal (5 messages)</option>
+                                            <option value="10" <%= (settings.automod?.spamLimit || 5) == 10 ? 'selected' : '' %>>Lenient (10 messages)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Caps Filter (%)</label>
+                                        <input type="range" class="form-range" id="maxCaps" min="0" max="100" step="5"
+                                               value="<%= settings.automod?.maxCaps || 70 %>"
+                                               oninput="document.getElementById('capsValue').textContent = this.value + '%'">
+                                        <small class="form-text text-muted">Current: <span id="capsValue"><%= settings.automod?.maxCaps || 70 %>%</span></small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Max Mentions</label>
+                                        <select class="form-select" id="maxMentions">
+                                            <option value="0" <%= (settings.automod?.maxMentions || 5) == 0 ? 'selected' : '' %>>No mentions allowed</option>
+                                            <option value="3" <%= (settings.automod?.maxMentions || 5) == 3 ? 'selected' : '' %>>Max 3 mentions</option>
+                                            <option value="5" <%= (settings.automod?.maxMentions || 5) == 5 ? 'selected' : '' %>>Max 5 mentions</option>
+                                            <option value="10" <%= (settings.automod?.maxMentions || 5) == 10 ? 'selected' : '' %>>Max 10 mentions</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="allowLinks"
+                                               <%= settings.automod?.allowLinks ? 'checked' : '' %>>
+                                        <label class="form-check-label" for="allowLinks">
+                                            Allow links
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="allowInvites"
+                                               <%= settings.automod?.allowInvites ? 'checked' : '' %>>
+                                        <label class="form-check-label" for="allowInvites">
+                                            Allow Discord invites
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Punishment Action</label>
+                                        <select class="form-select" id="punishmentAction">
+                                            <option value="timeout" <%= (settings.automod?.punishment?.action || 'timeout') === 'timeout' ? 'selected' : '' %>>Timeout (default)</option>
+                                            <option value="kick" <%= (settings.automod?.punishment?.action || 'timeout') === 'kick' ? 'selected' : '' %>>Kick</option>
+                                            <option value="ban" <%= (settings.automod?.punishment?.action || 'timeout') === 'ban' ? 'selected' : '' %>>Ban</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Warning Limit</label>
+                                        <select class="form-select" id="warningLimit">
+                                            <option value="2" <%= (settings.automod?.punishment?.warnLimit || 3) == 2 ? 'selected' : '' %>>2 warnings</option>
+                                            <option value="3" <%= (settings.automod?.punishment?.warnLimit || 3) == 3 ? 'selected' : '' %>>3 warnings</option>
+                                            <option value="5" <%= (settings.automod?.punishment?.warnLimit || 3) == 5 ? 'selected' : '' %>>5 warnings</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages Settings -->
+                <div class="tab-pane fade" id="messages" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-comments me-2"></i>Message Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Greeting Message</label>
+                                <textarea class="form-control" id="greetingMessage" rows="3"
+                                          placeholder="Message sent when users say 'hi', 'hello', etc."><%= settings.greetingMessage || '' %></textarea>
+                                <small class="form-text text-muted">
+                                    Use {user} for user mention, {username} for username only
+                                </small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Welcome Message</label>
+                                <textarea class="form-control" id="welcomeMessage" rows="3"
+                                          placeholder="Message sent when new members join"><%= settings.welcomeMessage || '' %></textarea>
+                                <small class="form-text text-muted">
+                                    Use {user}, {username}, {server}, {membercount}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs Tab -->
+                <div class="tab-pane fade" id="logs" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-list me-2"></i>Recent Logs</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Logs viewer coming soon! For now, check your Discord log channel.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load guild channels
+async function loadChannels() {
+    try {
+        // This would need to be implemented to fetch channels from Discord API
+        // For now, we'll show a placeholder
+        console.log('Loading channels for guild <%= guild.id %>');
+    } catch (error) {
+        console.error('Error loading channels:', error);
+    }
+}
+
+// Save all settings
+async function saveAllSettings() {
+    const guildId = '<%= guild.id %>';
+
+    // Collect all settings
+    const settings = {
+        // General
+        logChannel: document.getElementById('logChannel').value,
+        welcomeChannel: document.getElementById('welcomeChannel').value,
+
+        // AutoMod
+        automod: {
+            enabled: document.getElementById('automodEnabled').checked,
+            badWords: document.getElementById('badWords').value.split(',').map(w => w.trim()).filter(w => w),
+            maxCaps: parseInt(document.getElementById('maxCaps').value),
+            maxMentions: parseInt(document.getElementById('maxMentions').value),
+            allowLinks: document.getElementById('allowLinks').checked,
+            allowInvites: document.getElementById('allowInvites').checked,
+            spamLimit: parseInt(document.getElementById('spamLimit').value),
+            punishment: {
+                action: document.getElementById('punishmentAction').value,
+                warnLimit: parseInt(document.getElementById('warningLimit').value)
+            }
+        },
+
+        // Messages
+        greetingMessage: document.getElementById('greetingMessage').value,
+        welcomeMessage: document.getElementById('welcomeMessage').value
+    };
+
+    try {
+        const response = await fetch(`/api/settings/${guildId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ settings })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            showToast('All settings saved successfully!', 'success');
+        } else {
+            showToast('Failed to save settings', 'error');
+        }
+    } catch (error) {
+        console.error('Error saving settings:', error);
+        showToast('Error saving settings', 'error');
+    }
+}
+
+// Toast notification
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `${message}<button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// Load channels and populate dropdowns
+async function loadChannels() {
+    const guildId = '<%= guild.id %>';
+
+    try {
+        const response = await fetch(`/api/guilds/${guildId}/channels`);
+        const data = await response.json();
+
+        if (data.channels) {
+            // Populate log channel dropdown
+            const logChannelSelect = document.getElementById('logChannel');
+            logChannelSelect.innerHTML = '<option value="">Select a channel...</option>';
+
+            // Populate welcome channel dropdown
+            const welcomeChannelSelect = document.getElementById('welcomeChannel');
+            welcomeChannelSelect.innerHTML = '<option value="">Select a channel...</option>';
+
+            // Get current settings to pre-select
+            const currentLogChannel = '<%= settings.logChannel || "" %>';
+            const currentWelcomeChannel = '<%= settings.welcomeChannel || "" %>';
+
+            data.channels.forEach(channel => {
+                // Log channel option
+                const logOption = document.createElement('option');
+                logOption.value = channel.id;
+                logOption.textContent = `#${channel.name}`;
+                if (channel.id === currentLogChannel) {
+                    logOption.selected = true;
+                }
+                logChannelSelect.appendChild(logOption);
+
+                // Welcome channel option
+                const welcomeOption = document.createElement('option');
+                welcomeOption.value = channel.id;
+                welcomeOption.textContent = `#${channel.name}`;
+                if (channel.id === currentWelcomeChannel) {
+                    welcomeOption.selected = true;
+                }
+                welcomeChannelSelect.appendChild(welcomeOption);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading channels:', error);
+        showToast('Failed to load channels', 'error');
+    }
+}
+
+// Load channels on page load
+document.addEventListener('DOMContentLoaded', loadChannels);
+</script>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

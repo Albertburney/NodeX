@@ -1,14 +1,8 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
-const fs = require('fs');
-
-function loadSettings() {
-  if (!fs.existsSync('./settings.json')) return {};
-  return JSON.parse(fs.readFileSync('./settings.json', 'utf8'));
-}
+const { getServerSettings } = require('../Utils/settings');
 
 async function handleRoleLog(oldMember, newMember) {
-  const settings = loadSettings();
-  const serverSettings = settings[newMember.guild.id];
+  const serverSettings = getServerSettings(newMember.guild.id);
   if (!serverSettings?.logChannel) return;
 
   const logChannel = newMember.client.channels.cache.get(serverSettings.logChannel);

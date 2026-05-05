@@ -1,7 +1,7 @@
 {
   "1422794587310784594": {
-    "logChannel": "1500434899222397103",
-    "welcomeChannel": "1422794587906248707",
+    "logChannel": "1425015638379724840",
+    "welcomeChannel": "",
     "reactionRoles": [
       {
         "messageId": "1500467953202757762",
@@ -13,6 +13,21 @@
         "emoji": "❤️",
         "roleId": "1500467794259742880"
       }
-    ]
+    ],
+    "greetingMessage": "Hey how are you",
+    "welcomeMessage": "Welcome {user} to {server}! You are member #{membercount}. Enjoy your stay! 🎉",
+    "automod": {
+      "enabled": false,
+      "badWords": [],
+      "maxCaps": 70,
+      "maxMentions": 5,
+      "allowLinks": false,
+      "allowInvites": false,
+      "spamLimit": 5,
+      "punishment": {
+        "action": "timeout",
+        "warnLimit": 3
+      }
+    }
   }
 }

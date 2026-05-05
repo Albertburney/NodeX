@@ -1,17 +1,11 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
-const fs = require('fs');
-
-function loadSettings() {
-  if (!fs.existsSync('./settings.json')) return {};
-  return JSON.parse(fs.readFileSync('./settings.json', 'utf8'));
-}
+const { getServerSettings } = require('../Utils/settings');
 
 async function handleMessageDelete(message) {
   if (message.author?.bot) return;
   if (!message.guild) return;
 
-  const settings = loadSettings();
-  const serverSettings = settings[message.guild.id];
+  const serverSettings = getServerSettings(message.guild.id);
   if (!serverSettings?.logChannel) return;
 
   const logChannel = message.client.channels.cache.get(serverSettings.logChannel);
